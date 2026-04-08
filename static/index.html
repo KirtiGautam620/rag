@@ -3,62 +3,387 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAG Application</title>
+    <title>AI RAG Assistant | Premium Experience</title>
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; min-height: 100vh; display: flex; justify-content: center; padding: 40px 16px; }
-        .container { max-width: 720px; width: 100%; }
-        h1 { text-align: center; margin-bottom: 24px; }
+        :root {
+            --bg-deep: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --error: #ef4444;
+        }
 
-        .card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-        .card h2 { margin-bottom: 12px; font-size: 1.1rem; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
-        label { font-weight: 600; display: block; margin-bottom: 6px; }
-        input[type="file"] { margin-bottom: 12px; }
-        input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
-        button { padding: 10px 20px; border: none; border-radius: 8px; background: #4f46e5; color: #fff; font-size: 1rem; cursor: pointer; margin-top: 8px; }
-        button:hover { background: #4338ca; }
-        button:disabled { opacity: .5; cursor: not-allowed; }
+        body { 
+            background: var(--bg-deep); 
+            color: var(--text-primary); 
+            min-height: 100vh; 
+            padding: 40px 20px;
+            background-image: radial-gradient(circle at top right, #1e1b4b, transparent), 
+                              radial-gradient(circle at bottom left, #1e1b4b, transparent);
+        }
 
-        .status { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; }
-        .status.success { display: block; background: #ecfdf5; color: #065f46; }
-        .status.error { display: block; background: #fef2f2; color: #991b1b; }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+        }
 
-        #answer-box { margin-top: 12px; white-space: pre-wrap; line-height: 1.6; }
-        .source { background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: .9rem; }
-        .source-label { font-weight: 600; margin-bottom: 4px; }
-        .loader { display: none; margin-top: 10px; font-style: italic; color: #666; }
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card { 
+            background: var(--bg-card); 
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px; 
+            padding: 28px; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .card h2 { 
+            margin-bottom: 20px; 
+            font-size: 1.25rem; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 svg {
+            color: var(--accent);
+        }
+
+        /* Form elements */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label { 
+            font-weight: 500; 
+            display: block; 
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        input[type="file"] { 
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        input[type="text"] { 
+            width: 100%; 
+            padding: 14px 18px; 
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border); 
+            border-radius: 14px; 
+            font-size: 1rem; 
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 12px; 
+            background: var(--accent); 
+            color: #fff; 
+            font-size: 1rem; 
+            font-weight: 600;
+            cursor: pointer; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover { 
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled { 
+            opacity: .5; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        /* Status messages */
+        .status { 
+            margin-top: 16px; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            font-size: 0.9rem;
+            display: none; 
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status.success { display: block; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status.error { display: block; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Answer & Sources */
+        .answer-output {
+            margin-top: 24px;
+            line-height: 1.7;
+            color: #e2e8f0;
+            font-size: 1.05rem;
+        }
+
+        .sources-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .source-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* Document List */
+        .doc-list {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .doc-name { color: var(--text-primary); font-weight: 500; }
+        .doc-meta { color: var(--text-secondary); font-size: 0.8rem; }
+
+        .loader { 
+            display: none; 
+            margin-top: 20px; 
+            text-align: center;
+        }
+
+        .dot-pulse {
+            position: relative;
+            left: -9999px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 9999px 0 0 0 var(--accent);
+            animation: dot-pulse 1.5s infinite linear;
+            margin: 0 auto;
+        }
+
+        @keyframes dot-pulse {
+            0% { box-shadow: 9999px 0 0 -5px var(--accent); }
+            30% { box-shadow: 9999px 0 0 2px var(--accent); }
+            60%, 100% { box-shadow: 9999px 0 0 -5px var(--accent); }
+        }
+
+        /* Layout for Query section */
+        .full-width { grid-column: 1 / -1; }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            body { padding: 20px 15px; }
+            header h1 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>RAG — Ask Your Document</h1>
+    <header>
+        <h1>AI RAG Assistant</h1>
+        <p>Intelligent document search & conversation memory</p>
+    </header>
 
-    <!-- Upload Section -->
-    <div class="card">
-        <h2>1. Upload a Document</h2>
-        <p style="margin-bottom: 12px; color: #666;">Supports <b>.pdf</b> and <b>.txt</b> files.</p>
-        <input type="file" id="file-input" accept=".pdf,.txt" />
-        <br />
-        <button id="upload-btn" onclick="uploadFile()">Upload</button>
-        <div id="upload-status" class="status"></div>
-    </div>
+    <div class="grid">
+        <!-- Upload Card -->
+        <div class="card">
+            <h2>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                Upload Document
+            </h2>
+            <div class="input-group">
+                <label>PDF or TXT files only</label>
+                <input type="file" id="file-input" accept=".pdf,.txt" />
+            </div>
+            <button id="upload-btn" class="btn" onclick="uploadFile()">
+                Upload & Process
+            </button>
+            <div id="upload-status" class="status"></div>
+        </div>
 
-    <!-- Query Section -->
-    <div class="card">
-        <h2>2. Ask a Question</h2>
-        <input type="text" id="question" placeholder="e.g. What is the main topic of this document?" />
-        <button id="ask-btn" onclick="askQuestion()">Ask</button>
-        <div class="loader" id="loader">Thinking…</div>
-        <div id="answer-box"></div>
-        <div id="sources"></div>
+        <!-- Document Manager Card -->
+        <div class="card">
+            <h2>
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                My Documents
+            </h2>
+            <div id="doc-list" class="doc-list">
+                <div class="doc-meta">No documents uploaded yet.</div>
+            </div>
+            <button class="btn btn-secondary" onclick="fetchDocuments()" style="margin-top: 15px; font-size: 0.8rem;">Refresh List</button>
+        </div>
+
+        <!-- Query Card -->
+        <div class="card full-width">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                <h2>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                    Ask a Question
+                </h2>
+                <button class="btn btn-secondary" onclick="clearHistory()" style="width: auto; margin-top: 0; padding: 6px 14px; font-size: 0.8rem;">Clear Memory</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="question" placeholder="e.g. Can you summarize the main findings?" autocomplete="off" />
+            </div>
+            <button id="ask-btn" class="btn" onclick="askQuestion()">
+                Send Message
+            </button>
+
+            <div class="loader" id="loader">
+                <div class="dot-pulse"></div>
+            </div>
+
+            <div id="answer-box" class="answer-output"></div>
+            <div id="sources" class="sources-section" style="display: none;"></div>
+        </div>
     </div>
 </div>
 
 <script>
+    // Fetch documents on load
+    window.onload = fetchDocuments;
+
+    async function fetchDocuments() {
+        const docList = document.getElementById('doc-list');
+        try {
+            const res = await fetch('/documents');
+            const docs = await res.json();
+            
+            if (docs.length === 0) {
+                docList.innerHTML = '<div class="doc-meta">No documents uploaded yet.</div>';
+                return;
+            }
+
+            docList.innerHTML = docs.map(doc => `
+                <div class="doc-item">
+                    <div class="doc-name">${doc.name}</div>
+                    <div class="doc-meta">${(doc.size / 1024).toFixed(1)} KB</div>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error('Failed to fetch documents', err);
+        }
+    }
+
+    async function clearHistory() {
+        if (!confirm('Clear conversation memory?')) return;
+        try {
+            const res = await fetch('/history', { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.message);
+        } catch (err) {
+            alert('Error clearing history: ' + err.message);
+        }
+    }
+
     async function uploadFile() {
         const fileInput = document.getElementById('file-input');
         const status = document.getElementById('upload-status');
+        const btn = document.getElementById('upload-btn');
+        
         status.className = 'status';
         status.style.display = 'none';
 
@@ -71,13 +396,17 @@
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
 
-        document.getElementById('upload-btn').disabled = true;
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
         try {
             const res = await fetch('/upload', { method: 'POST', body: formData });
             const data = await res.json();
             if (res.ok) {
                 status.textContent = data.message;
                 status.className = 'status success';
+                fetchDocuments(); // Refresh list
+                fileInput.value = ''; // Reset input
             } else {
                 status.textContent = data.detail || 'Upload failed.';
                 status.className = 'status error';
@@ -86,22 +415,25 @@
             status.textContent = 'Network error: ' + err.message;
             status.className = 'status error';
         }
-        document.getElementById('upload-btn').disabled = false;
+        btn.disabled = false;
+        btn.textContent = 'Upload & Process';
     }
 
     async function askQuestion() {
-        const question = document.getElementById('question').value.trim();
+        const questionInput = document.getElementById('question');
+        const question = questionInput.value.trim();
         const answerBox = document.getElementById('answer-box');
         const sourcesBox = document.getElementById('sources');
         const loader = document.getElementById('loader');
-
-        answerBox.textContent = '';
-        sourcesBox.innerHTML = '';
+        const btn = document.getElementById('ask-btn');
 
         if (!question) return;
 
+        answerBox.textContent = '';
+        sourcesBox.innerHTML = '';
+        sourcesBox.style.display = 'none';
         loader.style.display = 'block';
-        document.getElementById('ask-btn').disabled = true;
+        btn.disabled = true;
 
         try {
             const res = await fetch('/query', {
@@ -109,36 +441,66 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ question }),
             });
-            const data = await res.json();
 
-            if (res.ok) {
-                answerBox.textContent = data.answer;
+            if (!res.ok) {
+                const errorData = await res.json();
+                answerBox.innerHTML = `<span style="color: var(--error)">Error: ${errorData.detail || 'Something went wrong.'}</span>`;
+                loader.style.display = 'none';
+                btn.disabled = false;
+                return;
+            }
 
-                if (data.sources && data.sources.length) {
-                    const heading = document.createElement('div');
-                    heading.className = 'source-label';
-                    heading.textContent = 'Sources:';
-                    sourcesBox.appendChild(heading);
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            
+            loader.style.display = 'none';
 
-                    data.sources.forEach((s, i) => {
-                        const div = document.createElement('div');
-                        div.className = 'source';
-                        div.textContent = `[${i + 1}] ${s.content}`;
-                        sourcesBox.appendChild(div);
-                    });
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value, { stream: true });
+                fullText += chunk;
+
+                // Handle sources separately in the UI
+                if (fullText.includes('\n\nSources:')) {
+                    const parts = fullText.split('\n\nSources:');
+                    answerBox.textContent = parts[0];
+                    
+                    const sourcesRaw = parts[1].trim();
+                    if (sourcesRaw) {
+                        displaySources(sourcesRaw);
+                    }
+                } else {
+                    answerBox.textContent = fullText;
                 }
-            } else {
-                answerBox.textContent = ' ' + (data.detail || 'Something went wrong.');
+                
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+
+            if (!fullText.trim()) {
+                answerBox.innerHTML = `<span style="color: var(--text-secondary); font-style: italic;">I couldn't find any relevant information in the uploaded documents to answer that question.</span>`;
             }
         } catch (err) {
-            answerBox.textContent = 'Network error: ' + err.message;
+            answerBox.innerHTML = `<span style="color: var(--error)">Network error: ${err.message}</span>`;
         }
 
-        loader.style.display = 'none';
-        document.getElementById('ask-btn').disabled = false;
+        btn.disabled = false;
+        questionInput.value = ''; // Optional: clear input after asking
     }
 
-    // Allow pressing Enter to ask
+    function displaySources(rawText) {
+        const sourcesBox = document.getElementById('sources');
+        sourcesBox.style.display = 'block';
+        
+        const lines = rawText.split('\n').filter(l => l.trim().startsWith('['));
+        if (lines.length > 0) {
+            sourcesBox.innerHTML = '<div class="source-label" style="font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">REFERENCED SOURCES</div>' + 
+                lines.map(line => `<div class="source-pill">${line}</div>`).join('');
+        }
+    }
+
     document.getElementById('question').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') askQuestion();
     });

@@ -36,3 +36,6 @@ env/
 # Project Specific
 uploads/
 *.log
+
+# Persistence
+faiss_index/
