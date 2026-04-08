@@ -21,6 +21,8 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y libgomp1
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
@@ -35,4 +37,4 @@ jobs:
       env:
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       run: |
-        pytest
+        python -m pytest -v
