@@ -39,7 +39,15 @@ INDEX_PATH = "faiss_index"
 ALLOWED_EXTENSIONS = {".pdf", ".txt"}
 
 vector_store = None  # will hold the FAISS index
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+_embeddings = None
+
+def get_embeddings():
+    """Lazy load the embeddings model to avoid unnecessary heavy loading on import."""
+    global _embeddings
+    if _embeddings is None:
+        logger.info("Initializing HuggingFaceEmbeddings...")
+        _embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    return _embeddings
 
 # --------------- Upgrade 6: Conversation Memory ---------------
 memory = ConversationBufferMemory(
@@ -59,7 +67,7 @@ async def startup_event():
         try:
             vector_store = FAISS.load_local(
                 INDEX_PATH, 
-                embeddings, 
+                get_embeddings(), 
                 allow_dangerous_deserialization=True
             )
             logger.info("Loaded existing FAISS index from disk.")
@@ -92,7 +100,7 @@ def build_vector_store(documents):
     # Use Cosine Similarity to ensure scores are between 0 and 1 for thresholding
     store = FAISS.from_documents(
         chunks, 
-        embeddings,
+        get_embeddings(),
         distance_strategy="cosine"
     )
     return store

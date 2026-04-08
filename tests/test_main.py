@@ -39,6 +39,8 @@ def test_query_no_document():
 
 def test_clear_history():
     """Verify that history clearing endpoint works."""
+    # We don't need to patch memory.clear here as conftest handles heavy loading,
+    # but patching it is fine to verify it was called.
     with patch("main.memory.clear") as mock_clear:
         response = client.delete("/history")
         assert response.status_code == 200
