@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG Application</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; min-height: 100vh; display: flex; justify-content: center; padding: 40px 16px; }
+        .container { max-width: 720px; width: 100%; }
+        h1 { text-align: center; margin-bottom: 24px; }
+
+        .card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .card h2 { margin-bottom: 12px; font-size: 1.1rem; }
+
+        label { font-weight: 600; display: block; margin-bottom: 6px; }
+        input[type="file"] { margin-bottom: 12px; }
+        input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; background: #4f46e5; color: #fff; font-size: 1rem; cursor: pointer; margin-top: 8px; }
+        button:hover { background: #4338ca; }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+
+        .status { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; }
+        .status.success { display: block; background: #ecfdf5; color: #065f46; }
+        .status.error { display: block; background: #fef2f2; color: #991b1b; }
+
+        #answer-box { margin-top: 12px; white-space: pre-wrap; line-height: 1.6; }
+        .source { background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: .9rem; }
+        .source-label { font-weight: 600; margin-bottom: 4px; }
+        .loader { display: none; margin-top: 10px; font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>RAG — Ask Your Document</h1>
+
+    <!-- Upload Section -->
+    <div class="card">
+        <h2>1. Upload a Document</h2>
+        <p style="margin-bottom: 12px; color: #666;">Supports <b>.pdf</b> and <b>.txt</b> files.</p>
+        <input type="file" id="file-input" accept=".pdf,.txt" />
+        <br />
+        <button id="upload-btn" onclick="uploadFile()">Upload</button>
+        <div id="upload-status" class="status"></div>
+    </div>
+
+    <!-- Query Section -->
+    <div class="card">
+        <h2>2. Ask a Question</h2>
+        <input type="text" id="question" placeholder="e.g. What is the main topic of this document?" />
+        <button id="ask-btn" onclick="askQuestion()">Ask</button>
+        <div class="loader" id="loader">Thinking…</div>
+        <div id="answer-box"></div>
+        <div id="sources"></div>
+    </div>
+</div>
+
+<script>
+    async function uploadFile() {
+        const fileInput = document.getElementById('file-input');
+        const status = document.getElementById('upload-status');
+        status.className = 'status';
+        status.style.display = 'none';
+
+        if (!fileInput.files.length) {
+            status.textContent = 'Please select a file first.';
+            status.className = 'status error';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        document.getElementById('upload-btn').disabled = true;
+        try {
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (res.ok) {
+                status.textContent = data.message;
+                status.className = 'status success';
+            } else {
+                status.textContent = data.detail || 'Upload failed.';
+                status.className = 'status error';
+            }
+        } catch (err) {
+            status.textContent = 'Network error: ' + err.message;
+            status.className = 'status error';
+        }
+        document.getElementById('upload-btn').disabled = false;
+    }
+
+    async function askQuestion() {
+        const question = document.getElementById('question').value.trim();
+        const answerBox = document.getElementById('answer-box');
+        const sourcesBox = document.getElementById('sources');
+        const loader = document.getElementById('loader');
+
+        answerBox.textContent = '';
+        sourcesBox.innerHTML = '';
+
+        if (!question) return;
+
+        loader.style.display = 'block';
+        document.getElementById('ask-btn').disabled = true;
+
+        try {
+            const res = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                answerBox.textContent = data.answer;
+
+                if (data.sources && data.sources.length) {
+                    const heading = document.createElement('div');
+                    heading.className = 'source-label';
+                    heading.textContent = 'Sources:';
+                    sourcesBox.appendChild(heading);
+
+                    data.sources.forEach((s, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'source';
+                        div.textContent = `[${i + 1}] ${s.content}`;
+                        sourcesBox.appendChild(div);
+                    });
+                }
+            } else {
+                answerBox.textContent = ' ' + (data.detail || 'Something went wrong.');
+            }
+        } catch (err) {
+            answerBox.textContent = 'Network error: ' + err.message;
+        }
+
+        loader.style.display = 'none';
+        document.getElementById('ask-btn').disabled = false;
+    }
+
+    // Allow pressing Enter to ask
+    document.getElementById('question').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') askQuestion();
+    });
+</script>
+</body>
+</html>
