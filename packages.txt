@@ -1,1 +1,4 @@
 libgomp1
+zlib1g-dev
+libjpeg-dev
+libpng-dev
