@@ -1,0 +1,14 @@
+.git
+.gitignore
+.github
+__pycache__/
+*.py[cod]
+venv/
+.env
+uploads/
+faiss_index/
+Dockerfile
+docker-compose.yml
+.dockerignore
+package-lock.json
+node_modules/
